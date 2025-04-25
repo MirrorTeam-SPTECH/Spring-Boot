@@ -39,7 +39,6 @@ public class ControllerUsuarios {
         return repositoryUsuario.findById(id).map(usuario -> {
             usuario.setNome(novoUsuario.getNome());
             usuario.setEmail(novoUsuario.getEmail());
-            usuario.setTelefone(novoUsuario.getTelefone());
             usuario.setSenha(novoUsuario.getSenha());
             return repositoryUsuario.save(usuario);
         }).orElseThrow(() -> new RuntimeException("Usuario não encontrado"));
