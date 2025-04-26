@@ -1,78 +1,81 @@
 package com.exemplo.prototipo_PI.prototipo_PI.controller;
 
+import com.exemplo.prototipo_PI.prototipo_PI.Service.CustomUserDetailsService;
+import com.exemplo.prototipo_PI.prototipo_PI.Util.JwtUtil;
+import com.exemplo.prototipo_PI.prototipo_PI.exception.UserAlreadyExistsException;
 import com.exemplo.prototipo_PI.prototipo_PI.model.Usuarios;
-import com.exemplo.prototipo_PI.prototipo_PI.service.JwtUtil;
-import com.exemplo.prototipo_PI.prototipo_PI.service.UserService;
+import com.exemplo.prototipo_PI.prototipo_PI.Service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/auth")
 public class AuthController {
 
     @Autowired
     private JwtUtil jwtUtil;
 
     @Autowired
-    private UserService userService; // Um serviço que verifica o usuário no banco de dados
-
-    @PostMapping("/register")
-    public ResponseEntity<Usuarios> register(@RequestBody Usuarios usuario) {
-        Usuarios savedUser = userService.registrarUsuario(usuario);
-        return ResponseEntity.ok(savedUser);
-    }
+    private AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-        String username = loginRequest.getEmail();
-        String password = loginRequest.getSenha();
-
-        // Autentique o usuário
-        if (userService.authenticate(username, password)) {
-            String token = jwtUtil.generateToken(username);
-            return ResponseEntity.ok(new AuthResponse(token));
-        }
-
-        return ResponseEntity.status(401).body("Credenciais inválidas");
-    }
-
-    // Classe interna para representar a requisição de login
-    static class LoginRequest {
-        private String email;
-        private String senha;
-
-        public String getEmail() {
-            return email;
-        }
-
-        public void setEmail(String email) {
-            this.email = email;
-        }
-
-        public String getSenha() {
-            return senha;
-        }
-
-        public void setSenha(String senha) {
-            this.senha = senha;
+    public ResponseEntity<?> login(@RequestBody Usuarios loginRequest) {
+        try {
+            // troque authenticate(...) por authenticateManualWithExpiration(...)
+            Map<String, Object> authData = authService.authenticateManualWithExpiration(
+                    loginRequest.getEmail(),
+                    loginRequest.getSenha()
+            );
+            return ResponseEntity.ok(authData);
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Credenciais inválidas"));
         }
     }
 
-    // Classe interna para representar a resposta de autenticação
-    static class AuthResponse {
-        private String token;
-
-        public AuthResponse(String token) {
-            this.token = token;
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Usuário não autenticado"));
         }
 
-        public String getToken() {
-            return token;
-        }
+        String email = authentication.getName(); // Pega o e-mail do usuário logado (vindo do token)
 
-        public void setToken(String token) {
-            this.token = token;
+        Map<String, Object> response = new HashMap<>();
+        response.put("email", email);
+
+        return ResponseEntity.ok(response);
+    }
+
+
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody Usuarios usuario) {
+        try {
+            Usuarios usuarioRegistrado = authService.register(usuario);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", usuarioRegistrado.getId());
+            response.put("email", usuarioRegistrado.getEmail());
+            response.put("nome", usuarioRegistrado.getNome());
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (UserAlreadyExistsException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Erro ao registrar o usuário.");
+            errorResponse.put("status", 500);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
 }

@@ -1,9 +1,12 @@
 package com.exemplo.prototipo_PI.prototipo_PI.model;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
+import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import lombok.*;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "usuarios") // Nome da tabela no banco de dados
 public class Usuarios {
@@ -12,45 +15,15 @@ public class Usuarios {
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Geração automática do ID
     private Long id;
 
-    @Column(name = "email", unique = true, nullable = false) // Coluna para o email
+    @NotNull
+    @Email // Validação para que o campo tenha um formato de e-mail válido
+    @Column(unique = true) // Garante que não existam e-mails duplicados
     private String email;
 
-    @Column(name = "senha", nullable = false) // Coluna para a senha
-    private String senha;
+    @NotNull
+    private String senha; // Armazena a senha (deve ser criptografada)
 
-    @Column(name = "nome", nullable = false) // Coluna para o nome
-    private String nome;
+    @NotBlank // Garante que o nome não seja nulo ou vazio
+    private String nome; // Nome completo do usuário
 
-    // Getters e Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getSenha() {
-        return senha;
-    }
-
-    public void setSenha(String senha) {
-        this.senha = senha;
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
 }

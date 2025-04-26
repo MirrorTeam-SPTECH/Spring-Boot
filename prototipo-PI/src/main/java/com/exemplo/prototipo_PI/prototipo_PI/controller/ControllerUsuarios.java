@@ -3,8 +3,6 @@ package com.exemplo.prototipo_PI.prototipo_PI.controller;
 import com.exemplo.prototipo_PI.prototipo_PI.model.Usuarios;
 import com.exemplo.prototipo_PI.prototipo_PI.repository.RepositoryUsuarios;
 import org.springframework.web.bind.annotation.*;
-import com.exemplo.prototipo_PI.prototipo_PI.model.Usuarios;
-import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
