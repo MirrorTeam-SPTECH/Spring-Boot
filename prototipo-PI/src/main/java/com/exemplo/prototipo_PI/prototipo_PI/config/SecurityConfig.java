@@ -79,8 +79,8 @@ public class SecurityConfig {
                 // Enable CORS
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))                // Authorization rules
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/h2-console/**", "/api/auth/**").permitAll()   // open H2 and auth endpoints
-                        .anyRequest().authenticated()                                         // all other requests need auth
+                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**","/swagger-resources","/swagger-resources/**", "/h2-console/**", "/api/auth/**").permitAll()   // open H2 and auth endpoints
+                        .anyRequest().authenticated()
                 )
                 // Stateless session management
                 .sessionManagement(session ->
