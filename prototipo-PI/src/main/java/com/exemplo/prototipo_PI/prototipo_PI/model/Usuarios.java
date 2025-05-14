@@ -26,4 +26,5 @@ public class Usuarios {
     @NotBlank // Garante que o nome não seja nulo ou vazio
     private String nome; // Nome completo do usuário
 
+
 }
