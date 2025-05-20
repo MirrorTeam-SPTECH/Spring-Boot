@@ -1,18 +1,16 @@
 package com.exemplo.prototipo_PI.prototipo_PI.dto;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
-public class CreatePreferenceRequest {
-    private List<ItemDTO> items;
-    private String successUrl;
-    private String failureUrl;
+@NoArgsConstructor
+public class PagamentoRequest {
+    private Double valor;
+    private String descricao;
 }
