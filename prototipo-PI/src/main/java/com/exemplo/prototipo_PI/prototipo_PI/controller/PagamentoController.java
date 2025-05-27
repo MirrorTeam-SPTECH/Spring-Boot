@@ -18,24 +18,25 @@ public class PagamentoController {
 
     @PostMapping("/qrcode")
     public ResponseEntity<?> gerarQrCodePix(@RequestBody PagamentoRequest request) {
-        Map<String, Object> resposta = pagamentoService.criarPagamentoPix(request.getValor(), request.getDescricao(), "test_user_123456@testuser.com");
+        try {
+            Map<String, Object> resposta = pagamentoService.criarPagamentoPix(
+                    request.getValor(),
+                    request.getDescricao(),
+                    request.getEmail() // ✔️ agora o DTO deve ter o e-mail do cliente
+            );
 
-        // Extraindo os dados do QR code
-        Map<String, Object> pointOfInteraction = (Map<String, Object>) resposta.get("point_of_interaction");
-        if (pointOfInteraction == null) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ponto de interação não encontrado");
+            Map<String, Object> pointOfInteraction = (Map<String, Object>) resposta.get("point_of_interaction");
+            Map<String, Object> transactionData = (Map<String, Object>) pointOfInteraction.get("transaction_data");
+
+            return ResponseEntity.ok(Map.of(
+                    "qr_code_base64", transactionData.get("qr_code_base64"),
+                    "qr_code", transactionData.get("qr_code"),
+                    "ticket_url", resposta.get("transaction_details") != null
+                            ? ((Map) resposta.get("transaction_details")).get("external_resource_url")
+                            : null
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Erro ao gerar QR Code Pix: " + e.getMessage());
         }
-
-        Map<String, Object> transactionData = (Map<String, Object>) pointOfInteraction.get("transaction_data");
-        if (transactionData == null) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Dados da transação não encontrados");
-        }
-
-        // Envia os dados do QR Code e URL
-        return ResponseEntity.ok(Map.of(
-                "qr_code_base64", transactionData.get("qr_code_base64"),
-                "qr_code", transactionData.get("qr_code"),
-                "ticket_url", resposta.get("transaction_details") != null ? ((Map) resposta.get("transaction_details")).get("external_resource_url") : null
-        ));
     }
 }

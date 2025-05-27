@@ -33,16 +33,18 @@ public class MercadoPagoService {
         Map<String, Object> body = new HashMap<>();
         body.put("items", request.getItems());
 
-        // Aqui você pode definir as URLs de retorno
         Map<String, String> backUrls = new HashMap<>();
-        backUrls.put("success", request.getSuccessUrl());
-        backUrls.put("failure", request.getFailureUrl());
+        backUrls.put("success", "https://www.nike.com.br/");
+        backUrls.put("failure", "https://www.nike.com.br/");
+        backUrls.put("pending", "https://www.nike.com.br/");
+
         body.put("back_urls", backUrls);
         body.put("auto_return", "approved");
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
 
         ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
+
         Map<String, Object> responseBody = response.getBody();
 
         if (responseBody != null && responseBody.containsKey("init_point")) {

@@ -10,6 +10,6 @@ import lombok.Setter;
 public class ItemDTO {
     private String title;
     private int quantity;
-    private float unit_price;
+    private double unit_price;
 
 }

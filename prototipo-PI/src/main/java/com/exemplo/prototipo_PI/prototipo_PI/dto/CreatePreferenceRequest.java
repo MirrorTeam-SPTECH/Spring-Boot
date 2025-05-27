@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -13,6 +14,5 @@ import java.util.List;
 @AllArgsConstructor
 public class CreatePreferenceRequest {
     private List<ItemDTO> items;
-    private String successUrl;
-    private String failureUrl;
+    private Map<String, String> backUrls;
 }

@@ -13,4 +13,5 @@ import lombok.Setter;
 public class PagamentoRequest {
     private Double valor;
     private String descricao;
+    private String email;
 }
