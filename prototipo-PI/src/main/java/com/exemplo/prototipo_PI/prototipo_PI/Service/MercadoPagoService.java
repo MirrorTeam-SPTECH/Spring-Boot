@@ -34,9 +34,9 @@ public class MercadoPagoService {
         body.put("items", request.getItems());
 
         Map<String, String> backUrls = new HashMap<>();
-        backUrls.put("success", "https://www.nike.com.br/");
-        backUrls.put("failure", "https://www.nike.com.br/");
-        backUrls.put("pending", "https://www.nike.com.br/");
+        backUrls.put("success", "https://sptech.school/");
+        backUrls.put("failure", "https://sptech.school/");
+        backUrls.put("pending", "https://sptech.school/");
 
         body.put("back_urls", backUrls);
         body.put("auto_return", "approved");
