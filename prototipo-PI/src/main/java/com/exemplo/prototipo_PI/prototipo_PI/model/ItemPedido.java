@@ -3,6 +3,8 @@ package com.exemplo.prototipo_PI.prototipo_PI.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+
+
 public class ItemPedido {
     private int id;
     private String nome;
@@ -13,6 +15,8 @@ public class ItemPedido {
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String categoria;
+
+    public ItemPedido() {}
 
     // Construtor
     public ItemPedido(int id, String nome, String tempoPreparo, String preco, String imagem, String descricao, String categoria) {
