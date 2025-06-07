@@ -242,12 +242,5 @@
     "preco" : "20",
     "imagem" : "/img/batata-cheddar.png",
     "descricao" : null
-  }, {
-    "id" : 35,
-    "nome" : "cu",
-    "tempoPreparo" : "10-15 min",
-    "preco" : "12",
-    "imagem" : "/placeholder.svg",
-    "descricao" : "fs"
   } ]
 }

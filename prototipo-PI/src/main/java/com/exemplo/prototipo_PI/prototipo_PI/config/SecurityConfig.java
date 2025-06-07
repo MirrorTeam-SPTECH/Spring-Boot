@@ -32,19 +32,16 @@ public class SecurityConfig {
     @Autowired
     private JwtRequestFilter jwtRequestFilter;
 
-    // Password encoder bean
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // Expose AuthenticationManager
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
 
-    // DaoAuthenticationProvider to link UserDetailsService and PasswordEncoder
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -53,7 +50,6 @@ public class SecurityConfig {
         return authProvider;
     }
 
-    // CORS configuration for frontend
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -68,56 +64,46 @@ public class SecurityConfig {
         return source;
     }
 
-    // Security filter chain
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // 1) desabilita CSRF (já que vocês usam JWT)
                 .csrf(csrf -> csrf.disable())
-
-                // 2) permite carregar o console H2 em frames
                 .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
-
-                // 3) habilita CORS usando a configuração acima
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
-                // 4) regras de autorização
                 .authorizeHttpRequests(auth -> auth
-                        // — libera acesso geral ao Swagger, H2 console e endpoints de autenticação
+                        // Swagger, H2 e autenticação
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**",
-                                "/swagger-resources",
                                 "/swagger-resources/**",
                                 "/h2-console/**",
-                                "/api/auth/**",
-                                "/api/checkout/**"  // 🔥 ADICIONADO AQUI TAMBÉM
+                                "/api/auth/**"
                         ).permitAll()
 
-                        // — libera todos os métodos para /api/itens-pedidos
+                        // Itens do cardápio
                         .requestMatchers("/api/itens-pedidos/**").permitAll()
 
-                        // — libera endpoints de pagamento/checkout (redundante mas garante)
+                        /// — libera endpoints de pagamento/checkout (redundante mas garante)
                         .requestMatchers(HttpMethod.GET, "/api/checkout/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/checkout/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/api/checkout/**").permitAll()
 
-                        // — para qualquer outra requisição, exige autenticação
+                        // Estatísticas do dashboard e pedidos
+                        .requestMatchers(HttpMethod.GET, "/api/pedidos/dashboard/stats").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/pedidos").permitAll()
+
+                        // Registro de pedidos
+                        .requestMatchers(HttpMethod.POST, "/api/pedidos/registrar-balcao").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/pedidos/registrar-pix").permitAll()
+
+                        // Demais rotas requerem autenticação
                         .anyRequest().authenticated()
                 )
-
-                // 5) usa gerenciamento de sessão stateless (já que estamos com JWT)
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
-
-                // 6) registra o provider de autenticação via UserDetailsService
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider());
 
-        // 7) adiciona o filtro de JWT antes do UsernamePasswordAuthenticationFilter
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
     }
 }
